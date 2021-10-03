@@ -1,0 +1,177 @@
+substitutions:
+    friendly_name: "Fan Light Switch"
+
+esphome:
+  name: fanlightswitch
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Fan Light Fallback Hotspot"
+    password: !secret failback_password
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret ota_password
+
+ota:
+  password: !secret ota_password
+
+globals:
+  - id: var_speed
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+status_led:
+  pin:
+    number: GPIO3
+    inverted: True
+
+output:
+ - platform: template
+   id: custom_fan
+   type: float 
+   write_action:
+     - if:
+         condition:
+           lambda: return ((state == 0));
+         then:
+         # action for off
+           - output.turn_off: fan1
+           - output.turn_off: fan2
+           - output.turn_off: fan3
+           - globals.set:
+               id: var_speed
+               value: '0'
+     - if:
+         condition:
+           lambda: return ((state > 0) && (state < .34));
+         then:
+            # action for low
+           - output.turn_on: fan1
+           - output.turn_off: fan2
+           - output.turn_off: fan3
+           - globals.set:
+               id: var_speed
+               value: '1'
+
+     - if:
+         condition:
+           lambda: return ((state > .34) && (state < .7));
+         then:
+           # action for medium
+            - output.turn_on: fan1
+            - output.turn_off: fan2
+            - output.turn_on: fan3     
+            - globals.set:
+                id: var_speed
+                value: '2'
+     - if:
+          condition:
+            lambda: return ((state == 1));
+          then:
+            # action for high
+            - output.turn_on: fan1
+            - output.turn_on: fan2
+            - output.turn_on: fan3    
+            - globals.set:
+                id: var_speed
+                value: '3'
+ - platform: gpio
+   id: relay1
+   pin: GPIO14
+
+ - platform: gpio
+   id: fan1
+   pin: GPIO13
+ - platform: gpio
+   id: fan3
+   pin: GPIO4
+ - platform: gpio
+   id: fan2
+   pin: GPIO15
+              
+              
+fan:
+  - platform: speed
+    id: livingroomfan
+    output: custom_fan
+    name: "Living Room Fan"
+
+switch:
+  - platform: restart
+    name: "Fan Light Switch REBOOT"
+
+light:
+   # Top (or only) button
+   - platform: binary
+     name: "Fan  Light"
+     output: relay1
+     id: light1
+
+ # Buttons
+binary_sensor:
+   # Top (or only) button
+   - platform: gpio
+     pin:
+       number: GPIO16
+       mode: INPUT_PULLUP
+       inverted: True
+     name: "${friendly_name} Button"
+     #toggle relay on push
+     on_press:
+       - light.toggle: light1
+
+   - platform: gpio
+     pin:
+       number: GPIO00
+       mode: INPUT_PULLUP
+       inverted: True
+     id: fanpower
+     on_press:
+      - fan.toggle: livingroomfan
+
+   - platform: gpio
+     pin:
+       number: GPIO05
+       mode: INPUT_PULLUP
+       inverted: True
+     name: "Fan speed toggle"
+     on_press:
+       then:
+         - if:
+             condition:
+               lambda: 'return (id(var_speed) == 0 || id(var_speed) == 3);'
+             then:
+               - fan.turn_on:
+                   id: livingroomfan 
+                   speed: LOW
+         - if:
+             condition:
+               lambda: 'return id(var_speed) == 1;'
+             then:
+               - fan.turn_on:
+                   id: livingroomfan
+                   speed: MEDIUM
+         - if:
+             condition:
+               lambda: 'return id(var_speed) == 2;'
+             then:
+               - fan.turn_on:
+                   id: livingroomfan
+                   speed: HIGH
+
+
+
+

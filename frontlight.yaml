@@ -1,0 +1,85 @@
+substitutions:
+    friendly_name: "Front Light Switch"
+
+esphome:
+  name: frontlightswitch
+  platform: ESP8266
+  board: esp01_1m
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Front Light Fallback Hotspot"
+    password: !secret failback_password
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret ota_password
+
+ota:
+  password: !secret ota_password
+
+status_led:
+  pin:
+    number: GPIO4
+    inverted: True
+
+output:
+  # Top (or only) button
+  - platform: gpio
+    pin: GPIO13
+    id: relay1
+
+  # Bottom button (for Smart Double Switch - delete for single switch)
+  - platform: gpio
+    pin: GPIO14
+    id: relay2
+
+light:
+  # Top (or only) button
+  - platform: binary
+    name: "Entryway Light"
+    output: relay1
+    id: light1
+
+  # Bottom button (for Smart Double Switch - delete for single switch)
+  - platform: binary
+    name: "Front Light"
+    output: relay2
+    id: light2
+
+# Buttons
+binary_sensor:
+  # Top (or only) button
+  - platform: gpio
+    pin:
+      number: GPIO16
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "Entryway Light Button"
+    #toggle relay on push
+    on_press:
+      - light.toggle: light1
+
+  # Bottom button (for Smart Double Switch - delete for single switch)
+  - platform: gpio
+    pin:
+      number: GPIO12
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "Front Light Button"
+    #toggle relay on push
+    on_press:
+      - light.toggle: light2
+
+switch:
+- platform: restart
+  name: "Entryway Light Switch REBOOT"
