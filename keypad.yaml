@@ -1,0 +1,40 @@
+substitutions:
+  friendly_name: "keypad"
+
+esphome:
+  name: keypad
+  platform: ESP32
+  board: esp32thing
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${friendly_name} Hotspot"
+    password: !secret failback_password
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+#api:
+#  password: !secret ota_password
+
+
+
+ota:
+  password: !secret ota_password
+
+sensor:
+ - platform: wifi_signal
+   name: “esp32_1 WiFi Signal Sensor”
+   #   update_interval: s
+# - platform: adc
+#   pin: A0
+#   attenuation: 11db
+#   name: batery
+   

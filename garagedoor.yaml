@@ -39,7 +39,7 @@ switch:
 binary_sensor:
   - platform: gpio
     pin:
-      number: D5
+      number: D6
       mode: INPUT_PULLUP
       inverted: true
     name: "Garage Closed Reed Switch"
