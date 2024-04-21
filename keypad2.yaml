@@ -1,10 +1,10 @@
 substitutions:
-  friendly_name: "keypad"
+  friendly_name: "keypad2"
 
 esphome:
-  name: keypad
-  platform: ESP32
-  board: esp32thing
+  name: keypad2
+  platform: ESP8266
+  board: d1_mini
 
 wifi:
   ssid: !secret wifi_ssid
@@ -17,8 +17,15 @@ wifi:
 
 captive_portal:
 
+mqtt:
+  broker: 172.22.22.13
+  discovery: True
+  discovery_retain: True
+  keepalive: 10s
+
 # Enable logging
 logger:
+  #  level: DEBUG
 
 # Enable Home Assistant API
 api:
@@ -26,17 +33,20 @@ api:
 
 wiegand:
   - id: keypad
-    d0: GPIO26
-    d1: GPIO27
+    d0: GPIO5
+    d1: GPIO4
     on_key:
       - lambda: ESP_LOGI("KEY", "received key %d", x);
     on_tag:
       - lambda: ESP_LOGI("TAG", "received tag %s", x.c_str());
+      - mqtt.publish_json:
+          topic: "keypad/tag"
+          payload: |-
+            root["tag"] = x.c_str();
+
     on_raw:
       - lambda: ESP_LOGI("RAW", "received raw %d bits, value %llx", bits, value);
 
-
-# Example configuration entry
 key_collector:
   - id: pincode_reader
     source_id: keypad
@@ -56,10 +66,15 @@ key_collector:
       - logger.log:
           format: "input result: '%s', started by '%c', ended by '%c'"
           args: [ 'x.c_str()', "(start == 0 ? '~' : start)", "(end == 0 ? '~' : end)" ]
+      - mqtt.publish_json:
+          topic: "keypad/code"
+          payload: |-
+            root["code"] = x.c_str();
     on_timeout:
       - logger.log:
           format: "input timeout: '%s', started by '%c'"
           args: [ 'x.c_str()', "(start == 0 ? '~' : start)" ]
+
 
 ota:
   password: !secret ota_password

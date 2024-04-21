@@ -1,0 +1,120 @@
+substitutions:
+  friendly_name: "laundry2"
+  friendlyname: "laundry2"
+  deviceicon: "mdi:light-recessed"
+
+esphome:
+  name: laundry2
+
+bk72xx:
+  board: generic-bk7231t-qfn32-tuya
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${friendly_name} Hotspot"
+    password: !secret failback_password
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret ota_password
+
+ota:
+   password: !secret ota_password
+
+#################################
+
+## ---------------- ##
+##    Status LED    ##
+## ---------------- ##
+status_led:
+  pin:
+    number: P8
+    inverted: true
+
+## ----------------- ##
+##      Buttons      ##
+## ----------------- ##
+binary_sensor:
+  # Left Button
+  - platform: gpio
+    pin:
+      number: P14
+      # number: P7
+      mode: INPUT
+      inverted: True
+    id: left_button
+    on_press:
+      then:
+        - switch.toggle: switch_left
+    internal: True
+
+  # Right Button
+  - platform: gpio
+    pin:
+      number: P24
+      mode: INPUT
+      inverted: True
+    id: right_button
+    on_press:
+      then:
+        - switch.toggle: switch_right
+    internal: True
+
+switch:
+  ## ---------------- ##
+  ##      Relays      ##
+  ## ---------------- ##
+  # Left Switch
+  - platform: gpio
+    pin: P6
+    id: relay_left
+
+  # Right Switch
+  - platform: gpio
+    pin: P26
+    id: relay_right
+
+  ## ---------------- ##
+  ##     Switches     ##
+  ## ---------------- ##
+  # Left Switch
+  # Left Switch (Templated)
+  - platform: template
+    id: switch_left
+    name: ${friendlyname}_left
+    icon: ${deviceicon}
+    lambda: |-
+      if (id(relay_left).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - switch.turn_on: relay_left
+    turn_off_action:
+      - switch.turn_off: relay_left
+
+  # Right Switch (Templated)
+  - platform: template
+    id: switch_right
+    name: ${friendlyname}_right
+    icon: ${deviceicon}
+    lambda: |-
+      if (id(relay_right).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - switch.turn_on: relay_right
+    turn_off_action:
+      - switch.turn_off: relay_right
