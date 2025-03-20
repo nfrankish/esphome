@@ -1,5 +1,5 @@
 substitutions:
-  LIGHT_ON_TIME: 90s
+  LIGHT_ON_TIME: 20 min
 esphome:
   name: planelights
   on_boot:
@@ -12,18 +12,21 @@ esphome:
           - switch.turn_off: relay
           - delay: 60s
           - deep_sleep.enter:
-
         else:
          - switch.turn_on: relay
          - delay: ${LIGHT_ON_TIME}
          - switch.turn_off: relay
-         - delay: 1s
-         - switch.turn_on: relay
          - delay: 2s
-         - switch.turn_off: relay
-         - delay: 1s
          - switch.turn_on: relay
-         - delay: 30s
+         - delay: 4s
+         - switch.turn_off: relay
+         - delay: 2s
+         - switch.turn_on: relay
+         - delay: 4s
+         - switch.turn_off: relay
+         - delay: 2s
+         - switch.turn_on: relay
+         - delay: 120s
          - switch.turn_off: relay
          - deep_sleep.enter:
 
@@ -49,8 +52,8 @@ switch:
 
 
 deep_sleep:
-  run_duration: 120s
-  sleep_duration: 0s
+  #  run_duration: 30 min
+  #sleep_duration: 0s
 # Enable logging
 logger:
   level: DEBUG
@@ -65,55 +68,3 @@ wifi:
 ota:
    password: !secret ota_password
 
-api:
-  password: !secret ota_password
-
-binary_sensor:
-  - platform: gpio
-    pin:
-      number: GPIO12
-      mode:
-        input: true
-        pullup: true
-    name: trigger
-    filters:
-      - invert:
-    on_press:
-      then:
-        - switch.turn_on: relay
-        - delay: ${LIGHT_ON_TIME}
-        - switch.turn_off: relay
-        - delay: 1s
-        - switch.turn_on: relay
-        - delay: 2s
-        - switch.turn_off: relay
-        - delay: 1s
-        - switch.turn_on: relay
-        - delay: 30s
-        - switch.turn_off: relay
-
-
-        #timer:
-        #  - id: light_on
-        #    name: "Lights running"
-        #    duration: "00:00:30"
-
-        #automation:
-        #  - id: turn_on
-        #    trigger:
-        #      platform: state
-        #      entity_id: binary_sensor.trigger
-        #      from: "off"
-        #      to: "on"
-        #    action:
-        #      - switch.turn_on: relay
-        #      - delay: 30s
-        #      - switch.turn_off: relay
-        #  - id: turn_off
-        #    trigger:
-        #      platform: event
-        #      event_time: timer.finished
-        #      event_data:
-        #        entity_id: light_on
-        #    action:
-        #      - switch.turn_off: relay

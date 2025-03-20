@@ -77,7 +77,7 @@ output:
 light:
   # Light 1
   - platform: binary
-    name: west_light
+    name: Laundry Light
     icon: ${deviceicon}
     output: relay_1
     id: light_1
@@ -91,7 +91,7 @@ light:
 
    # Light 3
   - platform: binary
-    name: laundry_light
+    name: West Light
     icon: ${deviceicon}
     output: relay_3
     id: light_3

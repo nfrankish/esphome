@@ -130,13 +130,13 @@ switch:
   - platform: gpio
     pin: P6
     name: "${friendlyname}_left"
-    restore_mode: always off
+    restore_mode: RESTORE_DEFAULT_OFF
     id: relay_a
     icon: mdi:power-socket-au
   - platform: gpio
     pin: P26
     name: "${friendlyname}_right"
-    restore_mode: always off
+    restore_mode: RESTORE_DEFAULT_OFF
     id: relay_b
     icon: mdi:power-socket-au
     on_turn_on:
