@@ -40,36 +40,38 @@ sensor:
   - platform: uptime
     name: ${friendlyname} Uptime
   - platform: cse7766
+    update_interval: 10s
     current:
       name: "${friendlyname} Current"
       icon: mdi:current-ac
       filters:
         - multiply: 4.867
-        - throttle_average: 30s
+        - filter_out: nan
     voltage:
       name: "${friendlyname} Voltage"
       icon: mdi:flash
       filters:
         - multiply: 1.905
-        - throttle_average: 30s
+        - filter_out: nan
     power:
       name: "${friendlyname} Power"
       icon: mdi:gauge
       id: powerpoint_wattage
       filters:
-        - throttle_average: 30s
+        - filter_out: nan
     energy:
       name: "${friendlyname} Energy"
       icon: mdi:gauge
       id: powerpoint_energy
       filters:
-        - throttle: 30s
+        - filter_out: nan
   - platform: total_daily_energy
     name: "${friendlyname} Daily Energy"
     power_id: powerpoint_wattage
     filters:
       - multiply: 0.001
       - throttle: 60s
+      - filter_out: nan
     unit_of_measurement: kWh
     icon: mdi:chart-bar
 
@@ -130,7 +132,7 @@ switch:
   - platform: gpio
     pin: P6
     name: "${friendlyname}_left"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: RESTORE_DEFAULT_ON
     id: relay_a
     icon: mdi:power-socket-au
   - platform: gpio

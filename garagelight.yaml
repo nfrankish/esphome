@@ -2,7 +2,7 @@ substitutions:
     friendly_name: "Garage Light Switch"
 
 esphome:
-  name: garagelight
+  name: garagelight2
   platform: ESP8266
   board: esp01_1m
 
@@ -36,13 +36,22 @@ output:
   # Top (or only) button
   - platform: gpio
     pin: GPIO13
+    id: relay2
+
+  - platform: gpio
+    pin: GPIO14
     id: relay1
 
 light:
   # Top (or only) button
   - platform: binary
-    name: "Garage Light"
+    name: "Garage Fan"
     output: relay1
+    id: fan1
+
+  - platform: binary
+    name: "Garage Light"
+    output: relay2
     id: light1
 
 # Buttons
@@ -51,12 +60,23 @@ binary_sensor:
   - platform: gpio
     pin:
       number: GPIO16
-      mode: INPUT_PULLUP
+#      mode: INPUT_PULLUP
       inverted: True
-    name: "${friendly_name} Button"
+    name: "Garage Light Button"
     #toggle relay on push
     on_press:
       - light.toggle: light1
+
+  - platform: gpio
+    pin:
+      number: GPIO12
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "Garage Fan Button"
+    #toggle relay on push
+    on_press:
+      - light.toggle: fan1
+
 
 switch:
 - platform: restart
